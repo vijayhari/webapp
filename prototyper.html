@@ -1,84 +1,128 @@
 <!doctype html>
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"></meta>
-  <title>Green Navigation</title>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"></meta>
+    <title>Green Navigation</title>
 
- <link rel="import" href="css/theme.html">
- <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="import" href="css/theme.html">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 
-  <script type="text/javascript" src="libs/webcomponentsjs/webcomponents.js"></script>
-  <script type="text/javascript" src="libs/routing-api/routing-api.js"></script>
+    <script type="text/javascript" src="libs/webcomponentsjs/webcomponents.js"></script>
+    <script type="text/javascript" src="libs/routing-api/routing-api.js"></script>
 
-  <link rel="import" href="libs/code-mirror/code-mirror.html">
+    <link rel="import" href="libs/code-mirror/code-mirror.html">
 
-  <link rel="import" href="libs/gn-map/gn-map.html">
-  <link rel="import" href="libs/gn-map/gn-point.html">
-  <link rel="import" href="libs/gn-map/gn-poly.html">
+    <link rel="import" href="libs/gn-map/gn-map.html">
+    <link rel="import" href="libs/gn-map/gn-point.html">
+    <link rel="import" href="libs/gn-map/gn-poly.html">
 
-  <link rel="import" href="libs/iron-flex-layout/classes/iron-flex-layout.html">
+    <link rel="import" href="libs/iron-flex-layout/classes/iron-flex-layout.html">
+    <link rel="import" href="libs/iron-pages/iron-pages.html">
 
-  <link rel="import" href="libs/paper-button/paper-button.html">
-  <link rel="import" href="libs/paper-dialog-scrollable/paper-dialog-scrollable.html">
-  <link rel="import" href="libs/paper-dialog/paper-dialog.html">
-  <link rel="import" href="libs/paper-drawer-panel/paper-drawer-panel.html">
-  <link rel="import" href="libs/paper-header-panel/paper-header-panel.html">
-  <link rel="import" href="libs/paper-icon-button/paper-icon-button.html">
-  <link rel="import" href="libs/paper-menu-button/paper-menu-button.html">
-  <link rel="import" href="libs/paper-menu/paper-menu.html">
-  <link rel="import" href="libs/paper-scroll-header-panel/paper-scroll-header-panel.html">
-  <link rel="import" href="libs/paper-styles/paper-styles.html">
-  <link rel="import" href="libs/paper-toolbar/paper-toolbar.html">
+    <link rel="import" href="libs/paper-button/paper-button.html">
+    <link rel="import" href="libs/paper-tab/paper-tabs.html">
+    <link rel="import" href="libs/paper-tabs/paper-tabs.html">
+    <link rel="import" href="libs/paper-toolbar/paper-toolbar.html">
 
-  <style>
+    <style>
     .CodeMirror {
       height: 100%;
     }
-  </style>
 
-</head>
-<body class="fullbleed layout vertical">
-  <template is="dom-bind">
+    gn-map {
+      background-color: #283;
+    }
+    </style>
 
-        <paper-toolbar>
-          <h3>Menu</h3>
-        </paper-toolbar>
+  </head>
+  <body class="fullbleed layout vertical">
+    <template is="dom-bind" id="bind">
 
-        <div class="horizontal layout" style="height:100%">
+      <paper-toolbar>
+        <h3>Greennav</h3>
+        <span class="flex"></span>
 
-          <div class="flex-1" style="position: relative">
-            <code-mirror class="fit"></code-mirror>
-          </div>
+        <paper-tabs selected="{{selected}}">
+          <paper-tab>Map</paper-tab>
+          <paper-tab>API</paper-tab>
+          <paper-tab>Fehler</paper-tab>
+          <paper-tab>Hilfe</paper-tab>
+        </paper-tabs>
 
-          <div class="flex-1" style="position: relative">
-            <gn-map
-              class="fit"
-              longitude="10.7001245"
-              latitude="53.8338072"
-              zoom="17"
-              map-type="{{ mapType }}">
-              <gn-poly>
-                <template is="dom-repeat" items="{{ points }}">
-                  <gn-point longitude="{{item.lon}}" latitude="{{item.lat}}"></gn-point>
-                </template>
-              </gn-poly>
-            </gn-map>
-          </div>
+      </paper-toolbar>
 
+      <div class="horizontal layout" style="height:100%">
+
+        <div class="flex-1" style="position: relative">
+          <code-mirror class="fit"></code-mirror>
         </div>
 
-  </template>
-  <footer>
-    <p>
-      <paper-button onclick="run()">Run!</paper-button>
-    </p>
-  </footer>
+        <div class="flex-1" style="position: relative">
 
-  <script>
-    function run() {
-      var source = document.querySelector('code-mirror').getSource();
-      eval(source);
-    }
-  </script>
-</body>
+
+          <iron-pages selected="{{selected}}">
+            <gn-map class="fit"
+                    longitude="10.7001245"
+                    latitude="53.8338072"
+                    zoom="17"
+                    map-type="GoogleMap">
+            </gn-map>
+
+            <div>
+              <h3>API Dokumentation</h3>
+            </div>
+
+            <div>
+              <h3>Fehler</h3>
+              <p>{{ error.lineNumber }}</p>
+              <p>{{ error.stack }}</p>
+            </div>
+
+            <div>
+              <h3>Hilfe</h3>
+            </div>
+
+        </div>
+      </div>
+
+
+    </template>
+
+    <footer>
+      <p>
+        <paper-button onclick="run()">Run!</paper-button>
+        <paper-button onclick="loadFile('https://raw.githubusercontent.com/maxlorenz/routing-api/master/routing-api.js')">Beispiel laden</paper-button>
+      </p>
+    </footer>
+
+    <script>
+      function run() {
+        var source = document.querySelector('code-mirror').getSource();
+
+        try{
+          eval(source);
+        } catch (e) {
+          document.querySelector('#bind').error = e;
+          document.querySelector('#bind').selected = 2;
+        }
+      }
+
+      function loadFile(url) {
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+          if (request.readyState == 4 && request.status == 200) {
+            document.querySelector('code-mirror').setSource(request.responseText);
+          }
+        }
+
+        request.open('GET', url, true);
+        request.send();
+      }
+
+      // Select first tab (map)
+      document.querySelector('#bind').selected = 0;
+
+
+    </script>
+  </body>
 </html>
